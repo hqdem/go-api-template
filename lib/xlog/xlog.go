@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	globalLogger     zap.Logger
+	globalLogger     *zap.Logger
 	globalLoggerLock sync.RWMutex
 )
 
-func SetupGlobalLogger(logger zap.Logger) {
+func SetGlobalLogger(logger *zap.Logger) {
 	globalLoggerLock.Lock()
 	defer globalLoggerLock.Unlock()
 
@@ -22,7 +22,7 @@ func GetGlobalLogger() *zap.Logger {
 	globalLoggerLock.RLock()
 	defer globalLoggerLock.RUnlock()
 
-	return &globalLogger
+	return globalLogger
 }
 
 func Debug(msg string, fields ...zap.Field) {

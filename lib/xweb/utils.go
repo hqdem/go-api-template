@@ -11,32 +11,46 @@ import (
 
 func FacadeHandlerAdapter[FacadeT any, RespT any](
 	facade FacadeT,
-	f func(ctx context.Context, facade FacadeT) (RespT, error),
+	f func(ctx context.Context, w *ResponseHeaders, facade FacadeT) (RespT, error),
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, request *http.Request) {
 		//	TODO: tracing here
 		ctx := request.Context()
+		responseWrapper := &ResponseHeaders{
+			ResponseWriter: w,
+		}
 
-		res, err := f(ctx, facade)
+		res, err := f(ctx, responseWrapper, facade)
 		if err != nil {
-			var codedErr CodedError
-			if !errors.As(err, &codedErr) {
-				codedErr = NewInternalError(err)
-			}
-			_ = writeAPIErrorResponse(w, codedErr)
+			_ = writeAPIErrorResponse(responseWrapper, err)
 			return
 		}
-		_ = writeAPIOKResponse(w, res)
+		_ = writeAPIOKResponse(responseWrapper, res)
 	}
 }
 
-func writeAPIErrorResponse(w http.ResponseWriter, codedErr CodedError) error {
-	type apiErrorResponse struct {
-		Message string         `json:"message"`
-		Code    string         `json:"code"`
-		Details map[string]any `json:"details"`
+type ResponseHeaders struct {
+	http.ResponseWriter
+	httpCode int
+}
+
+func (w *ResponseHeaders) SetHTTPCode(httpCode int) {
+	w.httpCode = httpCode
+}
+
+type apiErrorResponse struct {
+	Message string         `json:"message"`
+	Code    string         `json:"code"`
+	Details map[string]any `json:"details"`
+}
+
+func writeAPIErrorResponse(w *ResponseHeaders, err error) error {
+	var codedErr CodedError
+	if !errors.As(err, &codedErr) {
+		codedErr = NewInternalError(err)
 	}
-	resp := apiErrorResponse{
+
+	resp := &apiErrorResponse{
 		Message: codedErr.Error(),
 		Code:    codedErr.CharCode(),
 		Details: codedErr.Details(),
@@ -56,14 +70,23 @@ func writeAPIErrorResponse(w http.ResponseWriter, codedErr CodedError) error {
 	return nil
 }
 
-func writeAPIOKResponse(w http.ResponseWriter, entity any) error {
-	content, err := json.Marshal(entity)
+type apiOKResponse struct {
+	Data any `json:"data"`
+}
+
+func writeAPIOKResponse(w *ResponseHeaders, entity any) error {
+	resp := &apiOKResponse{
+		Data: entity,
+	}
+	content, err := json.Marshal(resp)
 	if err != nil {
 		xlog.Error("can not marshall response entity", zap.Error(err))
 		return err
 	}
-	// TODO: custom http code
-	w.WriteHeader(http.StatusOK)
+	if w.httpCode == 0 {
+		w.httpCode = http.StatusOK
+	}
+	w.WriteHeader(w.httpCode)
 	_, err = w.Write(content)
 	if err != nil {
 		xlog.Error("error writing ok api response", zap.Error(err))
