@@ -38,6 +38,8 @@ func (a *ServerApp) initMiddlewares() error {
 }
 
 func (a *ServerApp) Run() error {
-	// TODO: start serving
+	// TODO: logging
+	//logMsg := fmt.Sprintf("start listen server on addr: %s", a.Listen)
+	//xlog.Info(logMsg)
 	return http.ListenAndServe(a.Listen, a.mux)
 }
