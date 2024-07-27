@@ -1,7 +1,9 @@
 package xhttp
 
 import (
+	"fmt"
 	"github.com/hqdem/go-api-template/pkg/core/facade"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -38,8 +40,7 @@ func (a *ServerApp) initMiddlewares() error {
 }
 
 func (a *ServerApp) Run() error {
-	// TODO: logging
-	//logMsg := fmt.Sprintf("start listen server on addr: %s", a.Listen)
-	//xlog.Info(logMsg)
+	logMsg := fmt.Sprintf("start listen server on addr: %s", a.Listen)
+	zap.L().Info(logMsg)
 	return http.ListenAndServe(a.Listen, a.mux)
 }

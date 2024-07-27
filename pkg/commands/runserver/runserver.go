@@ -1,6 +1,7 @@
 package runserver
 
 import (
+	"github.com/hqdem/go-api-template/lib/xlog"
 	"github.com/hqdem/go-api-template/pkg/config"
 	"github.com/hqdem/go-api-template/pkg/connectors/postgre"
 	"github.com/hqdem/go-api-template/pkg/core/facade"
@@ -9,6 +10,10 @@ import (
 
 func RunServer(cfgPath string) error {
 	cfg, err := config.NewConfig(cfgPath)
+	if err != nil {
+		return err
+	}
+	err = xlog.SetDefaultLogger(cfg.Logger.Level, cfg.Logger.Development)
 	if err != nil {
 		return err
 	}

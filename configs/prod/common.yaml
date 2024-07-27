@@ -1,2 +1,5 @@
 server:
   listen: "[::1]:8080"
+logger:
+  level: "INFO"
+  development: false

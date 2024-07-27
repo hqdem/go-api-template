@@ -1,56 +1,72 @@
 package xlog
 
 import (
+	"fmt"
 	"go.uber.org/zap"
-	"sync"
+	"go.uber.org/zap/zapcore"
+	"os"
+	"strings"
 )
 
-var (
-	globalLogger     *zap.Logger
-	globalLoggerLock sync.RWMutex
+const (
+	DEBUG  = "DEBUG"
+	INFO   = "INFO"
+	WARN   = "WARN"
+	ERROR  = "ERROR"
+	DPANIC = "DPANIC"
+	PANIC  = "PANIC"
+	FATAL  = "FATAL"
 )
 
-func SetGlobalLogger(logger *zap.Logger) {
-	globalLoggerLock.Lock()
-	defer globalLoggerLock.Unlock()
+func SetDefaultLogger(logLevel string, development bool) error {
+	encoderCfg := zap.NewProductionEncoderConfig()
+	encoderCfg.TimeKey = "timestamp"
+	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
 
-	globalLogger = logger
+	config := zap.Config{
+		Level:             zap.NewAtomicLevelAt(getZapLogLevel(logLevel)),
+		Development:       development,
+		DisableCaller:     false,
+		DisableStacktrace: false,
+		Sampling:          nil,
+		Encoding:          "json",
+		EncoderConfig:     encoderCfg,
+		OutputPaths: []string{
+			"stderr",
+		},
+		ErrorOutputPaths: []string{
+			"stderr",
+		},
+		InitialFields: map[string]interface{}{
+			"pid": os.Getpid(),
+		},
+	}
 
+	logger, err := config.Build()
+	if err != nil {
+		return err
+	}
+	zap.ReplaceGlobals(logger)
+	return nil
 }
 
-func GetGlobalLogger() *zap.Logger {
-	globalLoggerLock.RLock()
-	defer globalLoggerLock.RUnlock()
-
-	return globalLogger
-}
-
-func Debug(msg string, fields ...zap.Field) {
-	log := GetGlobalLogger()
-	log.Debug(msg, fields...)
-}
-
-func Warn(msg string, fields ...zap.Field) {
-	log := GetGlobalLogger()
-	log.Warn(msg, fields...)
-}
-
-func Info(msg string, fields ...zap.Field) {
-	log := GetGlobalLogger()
-	log.Info(msg, fields...)
-}
-
-func Error(msg string, fields ...zap.Field) {
-	log := GetGlobalLogger()
-	log.Error(msg, fields...)
-}
-
-func Fatal(msg string, fields ...zap.Field) {
-	log := GetGlobalLogger()
-	log.Error(msg, fields...)
-}
-
-func Panic(msg string, fields ...zap.Field) {
-	log := GetGlobalLogger()
-	log.Error(msg, fields...)
+func getZapLogLevel(logLevel string) zapcore.Level {
+	switch strings.ToUpper(logLevel) {
+	case DEBUG:
+		return zapcore.DebugLevel
+	case INFO:
+		return zapcore.InfoLevel
+	case WARN:
+		return zapcore.WarnLevel
+	case ERROR:
+		return zapcore.ErrorLevel
+	case DPANIC:
+		return zapcore.DPanicLevel
+	case PANIC:
+		return zapcore.PanicLevel
+	case FATAL:
+		return zapcore.FatalLevel
+	default:
+		panic(fmt.Sprintf("invalid log level: %s", logLevel))
+	}
 }

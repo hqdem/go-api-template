@@ -9,8 +9,14 @@ type ServerConf struct {
 	Listen string `yaml:"listen"`
 }
 
+type LoggerConf struct {
+	Level       string `yaml:"level"`
+	Development bool   `yaml:"development"`
+}
+
 type Config struct {
 	Server *ServerConf `yaml:"server"`
+	Logger *LoggerConf `yaml:"logger"`
 }
 
 func NewConfig(cfgPath string) (*Config, error) {

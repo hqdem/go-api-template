@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/hqdem/go-api-template/lib/xlog"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -57,14 +56,14 @@ func writeAPIErrorResponse(w *ResponseHeaders, err error) error {
 	}
 	jsonBytes, err := json.Marshal(resp)
 	if err != nil {
-		xlog.Error("can not marshall coded error", zap.Error(err))
+		zap.L().Error("can not marshall coded error", zap.Error(err))
 		return err
 	}
 
 	w.WriteHeader(codedErr.HTTPCode())
 	_, writingErr := w.Write(jsonBytes)
 	if writingErr != nil {
-		xlog.Error("error writing error response", zap.Error(writingErr))
+		zap.L().Error("error writing error response", zap.Error(writingErr))
 		return writingErr
 	}
 	return nil
@@ -80,7 +79,7 @@ func writeAPIOKResponse(w *ResponseHeaders, entity any) error {
 	}
 	content, err := json.Marshal(resp)
 	if err != nil {
-		xlog.Error("can not marshall response entity", zap.Error(err))
+		zap.L().Error("can not marshall response entity", zap.Error(err))
 		return err
 	}
 	if w.httpCode == 0 {
@@ -89,7 +88,7 @@ func writeAPIOKResponse(w *ResponseHeaders, entity any) error {
 	w.WriteHeader(w.httpCode)
 	_, err = w.Write(content)
 	if err != nil {
-		xlog.Error("error writing ok api response", zap.Error(err))
+		zap.L().Error("error writing ok api response", zap.Error(err))
 		return err
 	}
 	return nil
