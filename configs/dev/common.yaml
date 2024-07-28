@@ -3,3 +3,9 @@ server:
 logger:
   level: "DEBUG"
   development: true
+handlers:
+  default_timeout_secs: 60
+  handlers_timeouts:
+    - method: "GET"
+      endpoint: "ping"
+      timeout_secs: 120

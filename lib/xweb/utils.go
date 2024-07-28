@@ -13,25 +13,49 @@ func FacadeHandlerAdapter[FacadeT any, RespT any](
 	f func(ctx context.Context, w *ResponseHeaders, facade FacadeT) (RespT, error),
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, request *http.Request) {
-		//	TODO: tracing here
+		// TODO: tracing here
 		ctx := request.Context()
+
+		var (
+			res RespT
+			err error
+		)
 		responseWrapper := &ResponseHeaders{
 			ResponseWriter: w,
 		}
+		doneFnCh := make(chan struct{})
 
-		res, err := f(ctx, responseWrapper, facade)
-		if err != nil {
-			writingErr := writeAPIErrorResponse(responseWrapper, err)
-			if writingErr != nil {
-				panic(writingErr)
+		go func() {
+			res, err = f(ctx, responseWrapper, facade)
+			doneFnCh <- struct{}{}
+		}()
+
+		for {
+			select {
+			case <-ctx.Done():
+				// TODO: maybe need to log ctx.Err()
+				return
+			case <-doneFnCh:
+				handleWriteResponse(responseWrapper, res, err)
+				return
 			}
-			return
 		}
-		writingErr := writeAPIOKResponse(responseWrapper, res)
+	}
+}
+
+func handleWriteResponse[RespT any](responseWrapper *ResponseHeaders, res RespT, err error) {
+	if err != nil {
+		writingErr := writeAPIErrorResponse(responseWrapper, err)
 		if writingErr != nil {
 			panic(writingErr)
 		}
+		return
 	}
+	writingErr := writeAPIOKResponse(responseWrapper, res)
+	if writingErr != nil {
+		panic(writingErr)
+	}
+	return
 }
 
 type ResponseHeaders struct {

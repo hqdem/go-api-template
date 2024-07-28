@@ -14,9 +14,21 @@ type LoggerConf struct {
 	Development bool   `yaml:"development"`
 }
 
+type HandlersConfig struct {
+	DefaultTimeoutSecs int64                  `yaml:"default_timeout_secs"`
+	HandlersTimeouts   []HandlerTimeoutConfig `yaml:"handlers_timeouts"`
+}
+
+type HandlerTimeoutConfig struct {
+	Method      string `yaml:"method"`
+	Endpoint    string `yaml:"endpoint"`
+	TimeoutSecs int64  `yaml:"timeout_secs"`
+}
+
 type Config struct {
-	Server *ServerConf `yaml:"server"`
-	Logger *LoggerConf `yaml:"logger"`
+	Server   *ServerConf     `yaml:"server"`
+	Logger   *LoggerConf     `yaml:"logger"`
+	Handlers *HandlersConfig `yaml:"handlers"`
 }
 
 func NewConfig(cfgPath string) (*Config, error) {
