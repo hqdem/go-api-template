@@ -28,7 +28,7 @@ type HandlerTimeoutConfig struct {
 type Config struct {
 	Server   *ServerConf     `yaml:"server"`
 	Logger   *LoggerConf     `yaml:"logger"`
-	Handlers *HandlersConfig `yaml:"handlers"`
+	Handlers *HandlersConfig `yaml:"handlers"` // TODO: maybe move to xweb.go
 }
 
 func NewConfig(cfgPath string) (*Config, error) {
