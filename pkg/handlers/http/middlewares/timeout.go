@@ -3,14 +3,15 @@ package middlewares
 import (
 	"context"
 	"errors"
+	"github.com/hqdem/go-api-template/lib/xweb"
 	"net/http"
-	"time"
 )
 
-func TimeoutMiddleware(timeoutDuration time.Duration) Middleware {
+func TimeoutMiddleware(timeoutHandlersConfig *xweb.HandlersConfig) Middleware {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
-			ctx, cancel := context.WithTimeout(r.Context(), timeoutDuration)
+			handlerTimeout := timeoutHandlersConfig.GetHandlerTimeout(r.RequestURI, r.Method)
+			ctx, cancel := context.WithTimeout(r.Context(), handlerTimeout)
 
 			defer func() {
 				cancel()
