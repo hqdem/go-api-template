@@ -7,5 +7,5 @@ handlers:
   default_timeout_secs: 60
   handlers_timeouts:
     - method: "GET"
-      endpoint: "ping"
+      endpoint: "/ping"
       timeout_secs: 120

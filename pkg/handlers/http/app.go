@@ -2,26 +2,22 @@ package xhttp
 
 import (
 	"fmt"
-	"github.com/hqdem/go-api-template/pkg/config"
 	"github.com/hqdem/go-api-template/pkg/core/facade"
 	"github.com/hqdem/go-api-template/pkg/handlers/http/middlewares"
 	"go.uber.org/zap"
 	"net/http"
-	"time"
 )
 
 type ServerApp struct {
-	Facade         *facade.Facade
-	handlersConfig *config.HandlersConfig
-	mux            *http.ServeMux
-	server         *http.Server
+	Facade *facade.Facade
+	mux    *http.ServeMux
+	server *http.Server
 }
 
 func NewServerApp(facade *facade.Facade) (*ServerApp, error) {
 	cfg := facade.Config
 	appContainer := &ServerApp{
-		Facade:         facade,
-		handlersConfig: cfg.Handlers,
+		Facade: facade,
 	}
 
 	appContainer.mux = http.NewServeMux()
@@ -43,8 +39,9 @@ func NewServerApp(facade *facade.Facade) (*ServerApp, error) {
 }
 
 func (a *ServerApp) initMiddlewares(handler http.Handler) (http.Handler, error) {
+	cfg := a.Facade.Config
 	middlewareChain := []middlewares.Middleware{
-		middlewares.TimeoutMiddleware(time.Second * 3),
+		middlewares.TimeoutMiddleware(cfg.Handlers),
 	}
 
 	for _, middleware := range middlewareChain {
