@@ -92,35 +92,49 @@ func getZapLogLevel(logLevel string) zapcore.Level {
 
 func Info(ctx context.Context, msg string, fields ...zap.Field) {
 	log := GetGlobalLogger()
+	ctxFields := GetContextFields(ctx)
+	fields = mergeFields(ctxFields, fields)
 	log.Info(msg, fields...)
 }
 
 func Error(ctx context.Context, msg string, fields ...zap.Field) {
 	log := GetGlobalLogger()
+	ctxFields := GetContextFields(ctx)
+	fields = mergeFields(ctxFields, fields)
 	log.Error(msg, fields...)
 }
 
 func Warn(ctx context.Context, msg string, fields ...zap.Field) {
 	log := GetGlobalLogger()
+	ctxFields := GetContextFields(ctx)
+	fields = mergeFields(ctxFields, fields)
 	log.Warn(msg, fields...)
 }
 
 func Debug(ctx context.Context, msg string, fields ...zap.Field) {
 	log := GetGlobalLogger()
+	ctxFields := GetContextFields(ctx)
+	fields = mergeFields(ctxFields, fields)
 	log.Debug(msg, fields...)
 }
 
 func DPanic(ctx context.Context, msg string, fields ...zap.Field) {
 	log := GetGlobalLogger()
+	ctxFields := GetContextFields(ctx)
+	fields = mergeFields(ctxFields, fields)
 	log.DPanic(msg, fields...)
 }
 
 func Panic(ctx context.Context, msg string, fields ...zap.Field) {
 	log := GetGlobalLogger()
+	ctxFields := GetContextFields(ctx)
+	fields = mergeFields(ctxFields, fields)
 	log.Panic(msg, fields...)
 }
 
 func Fatal(ctx context.Context, msg string, fields ...zap.Field) {
 	log := GetGlobalLogger()
+	ctxFields := GetContextFields(ctx)
+	fields = mergeFields(ctxFields, fields)
 	log.Fatal(msg, fields...)
 }
