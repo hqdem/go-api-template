@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -53,6 +54,8 @@ func (s *WebRequestsUtilsTestSuite) TestWriteAPIErrorResponse() {
 			s.Require().NoError(err)
 
 			s.Require().Equal(testCase.ExpectedHTTPCode, w.Code)
+			actualContentType := w.Header().Get("Content-Type")
+			s.Require().Equal("application/json", strings.ToLower(actualContentType))
 
 			expectedBytes, err := json.Marshal(testCase.ExpectedRes)
 			s.Require().NoError(err)
@@ -98,6 +101,8 @@ func (s *WebRequestsUtilsTestSuite) TestWriteAPIOKResponse() {
 			err := writeAPIOKResponse(respWrapper, testCase.Entity)
 			s.Require().NoError(err)
 			s.Require().Equal(testCase.ExpectedHTTPCode, w.Code)
+			actualContentType := w.Header().Get("Content-Type")
+			s.Require().Equal("application/json", strings.ToLower(actualContentType))
 
 			expectedResp := &apiOKResponse{Data: testCase.Entity}
 			expectedBytes, err := json.Marshal(expectedResp)

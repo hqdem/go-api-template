@@ -89,6 +89,7 @@ func writeAPIErrorResponse(w *ResponseHeaders, err error) error {
 		return fmt.Errorf("can not marshall coded error: %w", err)
 	}
 
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(codedErr.HTTPCode())
 	_, writingErr := w.Write(jsonBytes)
 	if writingErr != nil {
@@ -112,6 +113,7 @@ func writeAPIOKResponse(w *ResponseHeaders, entity any) error {
 	if w.httpCode == 0 {
 		w.httpCode = http.StatusOK
 	}
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(w.httpCode)
 	_, err = w.Write(content)
 	if err != nil {
