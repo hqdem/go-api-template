@@ -1,10 +1,11 @@
 package xhttp
 
 import (
+	"context"
 	"fmt"
+	"github.com/hqdem/go-api-template/lib/xlog"
 	"github.com/hqdem/go-api-template/pkg/core/facade"
 	"github.com/hqdem/go-api-template/pkg/handlers/http/middlewares"
-	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -51,7 +52,8 @@ func (a *ServerApp) initMiddlewares(handler http.Handler) (http.Handler, error) 
 }
 
 func (a *ServerApp) Run() error {
+	// TODO: add run context
 	logMsg := fmt.Sprintf("start listen server on addr: %s", a.server.Addr)
-	zap.L().Info(logMsg)
+	xlog.Info(context.Background(), logMsg)
 	return a.server.ListenAndServe()
 }
