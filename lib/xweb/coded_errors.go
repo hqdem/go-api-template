@@ -1,6 +1,8 @@
 package xweb
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type CodedError interface {
 	HTTPCode() int
@@ -15,6 +17,7 @@ var _ CodedError = &GenericCodedError{}
 
 const (
 	InternalErrorCode = "INTERNAL_ERROR"
+	NotFoundErrorCode = "NOT_FOUND"
 )
 
 type GenericCodedError struct {

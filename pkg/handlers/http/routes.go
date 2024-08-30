@@ -17,5 +17,9 @@ func (a *ServerApp) GetRoutes() []Route {
 			Pattern: "GET /ping",
 			Fn:      xweb.FacadeHandlerAdapter(a.Facade, ping.PingHandler),
 		},
+		{
+			Pattern: "/",
+			Fn:      xweb.NotFoundHandler,
+		},
 	}
 }
