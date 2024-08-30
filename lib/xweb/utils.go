@@ -55,7 +55,6 @@ func handleWriteResponse[RespT any](responseWrapper *ResponseHeaders, res RespT,
 	if writingErr != nil {
 		panic(writingErr)
 	}
-	return
 }
 
 type ResponseHeaders struct {

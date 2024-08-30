@@ -109,6 +109,7 @@ func (s *WebRequestsUtilsTestSuite) TestWriteAPIOKResponse() {
 			s.Require().NoError(err)
 
 			responseBytes, err := io.ReadAll(w.Body)
+			s.Require().NoError(err)
 			s.Require().Equal(expectedBytes, responseBytes)
 		})
 	}

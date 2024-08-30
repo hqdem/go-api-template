@@ -5,17 +5,17 @@ import (
 	"go.uber.org/zap"
 )
 
-const ctxFieldsKey = "ctx_fields"
+type ctxFieldsKey struct{}
 
 func WithFields(ctx context.Context, fields ...zap.Field) context.Context {
 	if len(fields) == 0 {
 		return ctx
 	}
-	return context.WithValue(ctx, ctxFieldsKey, mergeFields(GetContextFields(ctx), fields))
+	return context.WithValue(ctx, ctxFieldsKey{}, mergeFields(GetContextFields(ctx), fields))
 }
 
 func GetContextFields(ctx context.Context) []zap.Field {
-	fields, _ := ctx.Value(ctxFieldsKey).([]zap.Field)
+	fields, _ := ctx.Value(ctxFieldsKey{}).([]zap.Field)
 	return fields
 }
 
