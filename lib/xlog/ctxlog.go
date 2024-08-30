@@ -16,6 +16,7 @@ func WithFields(ctx context.Context, fields ...zap.Field) context.Context {
 
 func GetContextFields(ctx context.Context) []zap.Field {
 	fields, _ := ctx.Value(ctxFieldsKey{}).([]zap.Field)
+	return nil
 	return fields
 }
 
