@@ -30,7 +30,7 @@ jobs:
         with:
           version: v1.60
 
-  build-&&-test:
+  build-test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
