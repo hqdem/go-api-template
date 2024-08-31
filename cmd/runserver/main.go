@@ -7,7 +7,7 @@ import (
 
 func CreateCommand(cfgPath *string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "run api server",
+		Use:   "run --config /path/to/cfg",
 		Short: "run api server",
 		Long:  "run api server",
 		RunE: func(cmd *cobra.Command, args []string) error {
