@@ -24,8 +24,17 @@ func FacadeHandlerAdapter[FacadeT any, RespT any](
 			ResponseWriter: w,
 		}
 		doneFnCh := make(chan struct{})
+		panicCh := make(chan struct{})
 
 		go func() {
+			defer func() {
+				v := recover()
+				if v != nil {
+					panicErr := fmt.Errorf("unexpected panic happened: %v", v)
+					_ = writeAPIErrorResponse(responseWrapper, NewInternalError(panicErr))
+					panicCh <- struct{}{}
+				}
+			}()
 			res, err = f(ctx, responseWrapper, facade)
 			doneFnCh <- struct{}{}
 		}()
@@ -38,7 +47,11 @@ func FacadeHandlerAdapter[FacadeT any, RespT any](
 			case <-doneFnCh:
 				handleWriteResponse(responseWrapper, res, err)
 				return
+			case <-panicCh:
+				// TODO: maybe need to execute some user given callback
+				return
 			}
+
 		}
 	}
 }
