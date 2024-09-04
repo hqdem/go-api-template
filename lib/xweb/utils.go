@@ -31,7 +31,7 @@ func FacadeHandlerAdapter[FacadeT any, RespT any](
 				v := recover()
 				if v != nil {
 					panicErr := fmt.Errorf("unexpected panic happened: %v", v)
-					writeAPIErrorResponse(responseWrapper, NewInternalError(panicErr))
+					_ = writeAPIErrorResponse(responseWrapper, NewInternalError(panicErr))
 					panicCh <- struct{}{}
 				}
 			}()
