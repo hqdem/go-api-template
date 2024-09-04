@@ -1,4 +1,4 @@
-package middlewares
+package middleware
 
 import (
 	"context"
@@ -19,7 +19,7 @@ func TimeoutMiddleware(timeoutHandlersConfig *xweb.HandlersConfig) Middleware {
 					w.WriteHeader(http.StatusGatewayTimeout)
 				}
 			}()
-			r = r.WithContext(ctx)
+			*r = *r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)
