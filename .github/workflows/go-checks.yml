@@ -1,7 +1,7 @@
 name: go-checks
 
 env:
-  GO_VERSION: 1.22.3
+  GO_VERSION: 1.22.x
 
 on:
   push:
