@@ -10,6 +10,22 @@ on:
     branches: [master]
 
 jobs:
+  deps-diff:
+    name: deps-diff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Update go.mod file
+        run: go mod tidy
+
+      - name: Check go.mod diff
+        run: git diff --exit-code go.mod
+
   staticcheck:
     name: staticcheck
     runs-on: ubuntu-latest
