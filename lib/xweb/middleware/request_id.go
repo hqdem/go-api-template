@@ -37,11 +37,10 @@ func RequestIDMiddleware() Middleware {
 			}
 
 			ctx := context.WithValue(r.Context(), requestIDCtxKey{}, requestID)
-			r = r.WithContext(ctx)
+			*r = *r.WithContext(ctx)
 
 			w.Header().Set(RequestIDHeader, requestID)
 			next.ServeHTTP(w, r)
-
 		}
 
 		return http.HandlerFunc(fn)

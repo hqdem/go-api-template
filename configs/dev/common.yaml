@@ -1,5 +1,5 @@
 server:
-  listen: "[::1]:8080"
+  listen: "[::1]:8081"
 logger:
   level: "DEBUG"
   development: true
