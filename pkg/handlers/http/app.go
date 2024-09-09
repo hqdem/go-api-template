@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/hqdem/go-api-template/lib/xlog"
-	"github.com/hqdem/go-api-template/lib/xweb/middleware"
+	xmiddleware "github.com/hqdem/go-api-template/lib/xweb/middleware"
 	"github.com/hqdem/go-api-template/pkg/core/facade"
+	"github.com/hqdem/go-api-template/pkg/handlers/http/middleware"
 	"net/http"
 )
 
@@ -41,9 +42,17 @@ func NewServerApp(facade *facade.Facade) (*ServerApp, error) {
 
 func (a *ServerApp) initMiddlewares(handler http.Handler) (http.Handler, error) {
 	cfg := a.Facade.Config
-	middlewareChain := []middleware.Middleware{
-		middleware.TimeoutMiddleware(cfg.Handlers),
-		middleware.RequestIDMiddleware(),
+	middlewareChain := []xmiddleware.Middleware{
+		xmiddleware.TimeoutMiddleware(cfg.Handlers),
+		xmiddleware.RequestIDMiddleware(),
+		middleware.LogRequestIDMiddleware(),
+	}
+
+	// reversing middleware chain to apply mw rules
+	// in top-down ordering before actual handler
+	// and down-top ordering after actual handler
+	for i, j := 0, len(middlewareChain)-1; i < j; i, j = i+1, j-1 {
+		middlewareChain[i], middlewareChain[j] = middlewareChain[j], middlewareChain[i]
 	}
 
 	for _, mw := range middlewareChain {
