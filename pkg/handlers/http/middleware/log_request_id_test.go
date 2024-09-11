@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"github.com/hqdem/go-api-template/lib/xlog"
+	"github.com/hqdem/go-api-template/lib/xtest"
 	"github.com/hqdem/go-api-template/lib/xweb/middleware"
 	"github.com/stretchr/testify/suite"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 )
 
 type LogRequestIDMiddlewareTestSuite struct {
-	suite.Suite
+	xtest.BaseTestSuite
 }
 
 func (s *LogRequestIDMiddlewareTestSuite) TestMiddleware() {
