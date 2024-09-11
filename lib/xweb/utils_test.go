@@ -1,6 +1,7 @@
 package xweb
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"github.com/stretchr/testify/suite"
@@ -9,6 +10,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 type WebRequestsUtilsTestSuite struct {
@@ -111,6 +113,98 @@ func (s *WebRequestsUtilsTestSuite) TestWriteAPIOKResponse() {
 			responseBytes, err := io.ReadAll(w.Body)
 			s.Require().NoError(err)
 			s.Require().Equal(expectedBytes, responseBytes)
+		})
+	}
+}
+
+func (s *WebRequestsUtilsTestSuite) TestFacadeHandlerAdapterFlow() {
+	type nopFacadeType struct{}
+	type nopResType struct{}
+	defaultCtxTimeout := time.Millisecond * 500
+
+	testCases := []struct {
+		Name               string
+		HandlerFn          func(ctx context.Context, w *ResponseHeaders, facade *nopFacadeType) (*nopResType, error)
+		OnCtxDoneHook      OnCtxDoneHookT
+		OnPanicHook        OnPanicFnHookT
+		ExpectedStatusCode int
+		IsPanic            bool
+		IsCtxDone          bool
+	}{
+		{
+			Name: "success_handle_without_error",
+			HandlerFn: func(ctx context.Context, w *ResponseHeaders, facade *nopFacadeType) (*nopResType, error) {
+				return &nopResType{}, nil
+			},
+			OnCtxDoneHook:      nopOnCtxDoneHook,
+			OnPanicHook:        nopOnPanicHook,
+			ExpectedStatusCode: http.StatusOK,
+			IsPanic:            false,
+			IsCtxDone:          false,
+		},
+		{
+			Name: "success_handle_with_error",
+			HandlerFn: func(ctx context.Context, w *ResponseHeaders, facade *nopFacadeType) (*nopResType, error) {
+				return nil, errors.New("some unexpected error")
+			},
+			OnCtxDoneHook:      nopOnCtxDoneHook,
+			OnPanicHook:        nopOnPanicHook,
+			ExpectedStatusCode: http.StatusInternalServerError,
+			IsPanic:            false,
+			IsCtxDone:          false,
+		},
+		{
+			Name: "panic_while_handle",
+			HandlerFn: func(ctx context.Context, w *ResponseHeaders, facade *nopFacadeType) (*nopResType, error) {
+				panic("123")
+			},
+			OnCtxDoneHook:      nopOnCtxDoneHook,
+			OnPanicHook:        nopOnPanicHook,
+			ExpectedStatusCode: http.StatusInternalServerError,
+			IsPanic:            true,
+			IsCtxDone:          false,
+		},
+		{
+			Name: "ctx_timeout_while_handle",
+			HandlerFn: func(ctx context.Context, w *ResponseHeaders, facade *nopFacadeType) (*nopResType, error) {
+				time.Sleep(defaultCtxTimeout * 20)
+				return nil, nil
+			},
+			OnCtxDoneHook:      nopOnCtxDoneHook,
+			OnPanicHook:        nopOnPanicHook,
+			ExpectedStatusCode: http.StatusOK, // We are not setting any status code when ctx deadline is exceeded. It's logic for timeout middleware
+			IsPanic:            false,
+			IsCtxDone:          true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		isOnPanicHookCalled := false
+		isOnCtxDoneHookCalled := false
+
+		s.Run(testCase.Name, func() {
+			SetPanicFnHook(func(ctx context.Context, panicErr error, panicStack []byte) {
+				isOnPanicHookCalled = true
+				testCase.OnPanicHook(ctx, panicErr, panicStack)
+			})
+			SetCtxDoneHook(func(ctx context.Context) {
+				isOnCtxDoneHookCalled = true
+				testCase.OnCtxDoneHook(ctx)
+			})
+
+			handler := FacadeHandlerAdapter(&nopFacadeType{}, testCase.HandlerFn)
+
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest("GET", "localhost:8080/operation", nil)
+			ctx, cancel := context.WithTimeout(r.Context(), defaultCtxTimeout)
+			defer cancel()
+			r = r.WithContext(ctx)
+
+			handler.ServeHTTP(w, r)
+
+			s.Require().Equal(testCase.ExpectedStatusCode, w.Code)
+			s.Require().Equal(testCase.IsPanic, isOnPanicHookCalled)
+			s.Require().Equal(testCase.IsCtxDone, isOnCtxDoneHookCalled)
 		})
 	}
 }

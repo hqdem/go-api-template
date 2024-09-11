@@ -6,7 +6,37 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"runtime/debug"
 )
+
+type OnPanicFnHookT func(ctx context.Context, panicErr error, panicStack []byte)
+type OnCtxDoneHookT func(ctx context.Context)
+
+var (
+	nopOnPanicHook   OnPanicFnHookT = func(ctx context.Context, panicErr error, panicStack []byte) {}
+	nopOnCtxDoneHook OnCtxDoneHookT = func(ctx context.Context) {}
+	onPanicHook                     = nopOnPanicHook
+	onCtxDoneHook                   = nopOnCtxDoneHook
+)
+
+// SetPanicFnHook is not thread safe and should be only called on application start
+func SetPanicFnHook(fn OnPanicFnHookT) {
+	if fn != nil {
+		onPanicHook = fn
+	}
+}
+
+// SetCtxDoneHook is not thread safe and should be only called on application start
+func SetCtxDoneHook(fn OnCtxDoneHookT) {
+	if fn != nil {
+		onCtxDoneHook = fn
+	}
+}
+
+type panicMessage struct {
+	panicErr   error
+	panicStack []byte
+}
 
 func FacadeHandlerAdapter[FacadeT any, RespT any](
 	facade FacadeT,
@@ -24,15 +54,17 @@ func FacadeHandlerAdapter[FacadeT any, RespT any](
 			ResponseWriter: w,
 		}
 		doneFnCh := make(chan struct{})
-		panicCh := make(chan struct{})
+		panicCh := make(chan panicMessage)
 
 		go func() {
 			defer func() {
 				v := recover()
 				if v != nil {
 					panicErr := fmt.Errorf("unexpected panic happened: %v", v)
-					_ = writeAPIErrorResponse(responseWrapper, NewInternalError(panicErr))
-					panicCh <- struct{}{}
+					panicCh <- panicMessage{
+						panicErr:   panicErr,
+						panicStack: debug.Stack(),
+					}
 				}
 			}()
 			res, err = f(ctx, responseWrapper, facade)
@@ -42,13 +74,14 @@ func FacadeHandlerAdapter[FacadeT any, RespT any](
 		for {
 			select {
 			case <-ctx.Done():
-				// TODO: maybe need to log ctx.Err()
+				onCtxDoneHook(ctx)
 				return
 			case <-doneFnCh:
 				handleWriteResponse(responseWrapper, res, err)
 				return
-			case <-panicCh:
-				// TODO: maybe need to execute some user given callback
+			case panicMsg := <-panicCh:
+				onPanicHook(ctx, panicMsg.panicErr, panicMsg.panicStack)
+				handleWriteResponse(responseWrapper, res, NewInternalError(panicMsg.panicErr))
 				return
 			}
 

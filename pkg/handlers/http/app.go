@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/hqdem/go-api-template/lib/xlog"
+	"github.com/hqdem/go-api-template/lib/xweb"
 	xmiddleware "github.com/hqdem/go-api-template/lib/xweb/middleware"
 	"github.com/hqdem/go-api-template/pkg/core/facade"
 	"github.com/hqdem/go-api-template/pkg/handlers/http/middleware"
@@ -11,15 +12,19 @@ import (
 )
 
 type ServerApp struct {
-	Facade *facade.Facade
-	mux    *http.ServeMux
-	server *http.Server
+	Facade        *facade.Facade
+	onPanicHook   xweb.OnPanicFnHookT
+	onCtxDoneHook xweb.OnCtxDoneHookT
+	mux           *http.ServeMux
+	server        *http.Server
 }
 
-func NewServerApp(facade *facade.Facade) (*ServerApp, error) {
+func NewServerApp(facade *facade.Facade, onPanicHook xweb.OnPanicFnHookT, onCtxDoneHook xweb.OnCtxDoneHookT) (*ServerApp, error) {
 	cfg := facade.Config
 	appContainer := &ServerApp{
-		Facade: facade,
+		Facade:        facade,
+		onPanicHook:   onPanicHook,
+		onCtxDoneHook: onCtxDoneHook,
 	}
 
 	appContainer.mux = http.NewServeMux()
@@ -37,6 +42,7 @@ func NewServerApp(facade *facade.Facade) (*ServerApp, error) {
 		Addr:    cfg.Server.Listen,
 		Handler: handler,
 	}
+	appContainer.initHooks()
 	return appContainer, nil
 }
 
@@ -59,6 +65,11 @@ func (a *ServerApp) initMiddlewares(handler http.Handler) (http.Handler, error) 
 		handler = mw(handler)
 	}
 	return handler, nil
+}
+
+func (a *ServerApp) initHooks() {
+	xweb.SetPanicFnHook(a.onPanicHook)
+	xweb.SetCtxDoneHook(a.onCtxDoneHook)
 }
 
 func (a *ServerApp) Run() error {
