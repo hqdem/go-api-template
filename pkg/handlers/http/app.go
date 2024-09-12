@@ -52,6 +52,7 @@ func (a *ServerApp) initMiddlewares(handler http.Handler) (http.Handler, error) 
 		xmiddleware.TimeoutMiddleware(cfg.Handlers),
 		xmiddleware.RequestIDMiddleware(),
 		middleware.LogRequestIDMiddleware(),
+		middleware.LogRequestMiddleware(),
 	}
 
 	// reversing middleware chain to apply mw rules
