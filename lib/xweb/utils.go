@@ -40,7 +40,7 @@ type panicMessage struct {
 
 func FacadeHandlerAdapter[FacadeT any, RespT any](
 	facade FacadeT,
-	f func(ctx context.Context, w *ResponseHeaders, facade FacadeT) (RespT, error),
+	f func(ctx context.Context, w *ResponseHeaders, r *http.Request, facade FacadeT) (RespT, error),
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, request *http.Request) {
 		// TODO: tracing here
@@ -67,7 +67,7 @@ func FacadeHandlerAdapter[FacadeT any, RespT any](
 					}
 				}
 			}()
-			res, err = f(ctx, responseWrapper, facade)
+			res, err = f(ctx, responseWrapper, request, facade)
 			doneFnCh <- struct{}{}
 		}()
 
