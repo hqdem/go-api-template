@@ -124,7 +124,7 @@ func (s *WebRequestsUtilsTestSuite) TestFacadeHandlerAdapterFlow() {
 
 	testCases := []struct {
 		Name               string
-		HandlerFn          func(ctx context.Context, w *ResponseHeaders, facade *nopFacadeType) (*nopResType, error)
+		HandlerFn          func(ctx context.Context, w *ResponseHeaders, r *http.Request, facade *nopFacadeType) (*nopResType, error)
 		OnCtxDoneHook      OnCtxDoneHookT
 		OnPanicHook        OnPanicFnHookT
 		ExpectedStatusCode int
@@ -133,7 +133,7 @@ func (s *WebRequestsUtilsTestSuite) TestFacadeHandlerAdapterFlow() {
 	}{
 		{
 			Name: "success_handle_without_error",
-			HandlerFn: func(ctx context.Context, w *ResponseHeaders, facade *nopFacadeType) (*nopResType, error) {
+			HandlerFn: func(ctx context.Context, w *ResponseHeaders, r *http.Request, facade *nopFacadeType) (*nopResType, error) {
 				return &nopResType{}, nil
 			},
 			OnCtxDoneHook:      nopOnCtxDoneHook,
@@ -144,7 +144,7 @@ func (s *WebRequestsUtilsTestSuite) TestFacadeHandlerAdapterFlow() {
 		},
 		{
 			Name: "success_handle_with_error",
-			HandlerFn: func(ctx context.Context, w *ResponseHeaders, facade *nopFacadeType) (*nopResType, error) {
+			HandlerFn: func(ctx context.Context, w *ResponseHeaders, r *http.Request, facade *nopFacadeType) (*nopResType, error) {
 				return nil, errors.New("some unexpected error")
 			},
 			OnCtxDoneHook:      nopOnCtxDoneHook,
@@ -155,7 +155,7 @@ func (s *WebRequestsUtilsTestSuite) TestFacadeHandlerAdapterFlow() {
 		},
 		{
 			Name: "panic_while_handle",
-			HandlerFn: func(ctx context.Context, w *ResponseHeaders, facade *nopFacadeType) (*nopResType, error) {
+			HandlerFn: func(ctx context.Context, w *ResponseHeaders, r *http.Request, facade *nopFacadeType) (*nopResType, error) {
 				panic("123")
 			},
 			OnCtxDoneHook:      nopOnCtxDoneHook,
@@ -166,7 +166,7 @@ func (s *WebRequestsUtilsTestSuite) TestFacadeHandlerAdapterFlow() {
 		},
 		{
 			Name: "ctx_timeout_while_handle",
-			HandlerFn: func(ctx context.Context, w *ResponseHeaders, facade *nopFacadeType) (*nopResType, error) {
+			HandlerFn: func(ctx context.Context, w *ResponseHeaders, r *http.Request, facade *nopFacadeType) (*nopResType, error) {
 				time.Sleep(defaultCtxTimeout * 20)
 				return nil, nil
 			},
