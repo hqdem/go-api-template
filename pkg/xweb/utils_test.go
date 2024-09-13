@@ -127,9 +127,11 @@ func (s *WebRequestsUtilsTestSuite) TestFacadeHandlerAdapterFlow() {
 		HandlerFn          func(ctx context.Context, w *ResponseHeaders, r *http.Request, facade *nopFacadeType) (*nopResType, error)
 		OnCtxDoneHook      OnCtxDoneHookT
 		OnPanicHook        OnPanicFnHookT
+		OnHandlerDoneHook  OnHandlerDoneHookT
 		ExpectedStatusCode int
 		IsPanic            bool
 		IsCtxDone          bool
+		IsHandlerDone      bool
 	}{
 		{
 			Name: "success_handle_without_error",
@@ -138,9 +140,11 @@ func (s *WebRequestsUtilsTestSuite) TestFacadeHandlerAdapterFlow() {
 			},
 			OnCtxDoneHook:      nopOnCtxDoneHook,
 			OnPanicHook:        nopOnPanicHook,
+			OnHandlerDoneHook:  nopOnHandlerDoneHook,
 			ExpectedStatusCode: http.StatusOK,
 			IsPanic:            false,
 			IsCtxDone:          false,
+			IsHandlerDone:      true,
 		},
 		{
 			Name: "success_handle_with_error",
@@ -149,9 +153,11 @@ func (s *WebRequestsUtilsTestSuite) TestFacadeHandlerAdapterFlow() {
 			},
 			OnCtxDoneHook:      nopOnCtxDoneHook,
 			OnPanicHook:        nopOnPanicHook,
+			OnHandlerDoneHook:  nopOnHandlerDoneHook,
 			ExpectedStatusCode: http.StatusInternalServerError,
 			IsPanic:            false,
 			IsCtxDone:          false,
+			IsHandlerDone:      true,
 		},
 		{
 			Name: "panic_while_handle",
@@ -160,27 +166,32 @@ func (s *WebRequestsUtilsTestSuite) TestFacadeHandlerAdapterFlow() {
 			},
 			OnCtxDoneHook:      nopOnCtxDoneHook,
 			OnPanicHook:        nopOnPanicHook,
+			OnHandlerDoneHook:  nopOnHandlerDoneHook,
 			ExpectedStatusCode: http.StatusInternalServerError,
 			IsPanic:            true,
 			IsCtxDone:          false,
+			IsHandlerDone:      false,
 		},
 		{
 			Name: "ctx_timeout_while_handle",
 			HandlerFn: func(ctx context.Context, w *ResponseHeaders, r *http.Request, facade *nopFacadeType) (*nopResType, error) {
-				time.Sleep(defaultCtxTimeout * 20)
+				time.Sleep(defaultCtxTimeout * 2)
 				return nil, nil
 			},
 			OnCtxDoneHook:      nopOnCtxDoneHook,
 			OnPanicHook:        nopOnPanicHook,
+			OnHandlerDoneHook:  nopOnHandlerDoneHook,
 			ExpectedStatusCode: http.StatusOK, // We are not setting any status code when ctx deadline is exceeded. It's logic for timeout middleware
 			IsPanic:            false,
 			IsCtxDone:          true,
+			IsHandlerDone:      false,
 		},
 	}
 
 	for _, testCase := range testCases {
 		isOnPanicHookCalled := false
 		isOnCtxDoneHookCalled := false
+		isOnHandlerDoneHookCalled := false
 
 		s.Run(testCase.Name, func() {
 			SetPanicFnHook(func(ctx context.Context, panicErr error, panicStack []byte) {
@@ -190,6 +201,10 @@ func (s *WebRequestsUtilsTestSuite) TestFacadeHandlerAdapterFlow() {
 			SetCtxDoneHook(func(ctx context.Context) {
 				isOnCtxDoneHookCalled = true
 				testCase.OnCtxDoneHook(ctx)
+			})
+			SetHandlerDoneHook(func(ctx context.Context, res any, err error) {
+				isOnHandlerDoneHookCalled = true
+				testCase.OnHandlerDoneHook(ctx, res, err)
 			})
 
 			handler := FacadeHandlerAdapter(&nopFacadeType{}, testCase.HandlerFn)
@@ -205,6 +220,7 @@ func (s *WebRequestsUtilsTestSuite) TestFacadeHandlerAdapterFlow() {
 			s.Require().Equal(testCase.ExpectedStatusCode, w.Code)
 			s.Require().Equal(testCase.IsPanic, isOnPanicHookCalled)
 			s.Require().Equal(testCase.IsCtxDone, isOnCtxDoneHookCalled)
+			s.Require().Equal(testCase.IsHandlerDone, isOnHandlerDoneHookCalled)
 		})
 	}
 }

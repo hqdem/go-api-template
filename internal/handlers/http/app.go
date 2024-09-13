@@ -12,19 +12,26 @@ import (
 )
 
 type ServerApp struct {
-	Facade        *facade.Facade
-	onPanicHook   xweb.OnPanicFnHookT
-	onCtxDoneHook xweb.OnCtxDoneHookT
-	mux           *http.ServeMux
-	server        *http.Server
+	Facade            *facade.Facade
+	onPanicHook       xweb.OnPanicFnHookT
+	onCtxDoneHook     xweb.OnCtxDoneHookT
+	onHandlerDoneHook xweb.OnHandlerDoneHookT
+	mux               *http.ServeMux
+	server            *http.Server
 }
 
-func NewServerApp(facade *facade.Facade, onPanicHook xweb.OnPanicFnHookT, onCtxDoneHook xweb.OnCtxDoneHookT) (*ServerApp, error) {
+func NewServerApp(
+	facade *facade.Facade,
+	onPanicHook xweb.OnPanicFnHookT,
+	onCtxDoneHook xweb.OnCtxDoneHookT,
+	onHandlerDoneHook xweb.OnHandlerDoneHookT,
+) (*ServerApp, error) {
 	cfg := facade.Config
 	appContainer := &ServerApp{
-		Facade:        facade,
-		onPanicHook:   onPanicHook,
-		onCtxDoneHook: onCtxDoneHook,
+		Facade:            facade,
+		onPanicHook:       onPanicHook,
+		onCtxDoneHook:     onCtxDoneHook,
+		onHandlerDoneHook: onHandlerDoneHook,
 	}
 
 	appContainer.mux = http.NewServeMux()
@@ -71,6 +78,7 @@ func (a *ServerApp) initMiddlewares(handler http.Handler) (http.Handler, error) 
 func (a *ServerApp) initHooks() {
 	xweb.SetPanicFnHook(a.onPanicHook)
 	xweb.SetCtxDoneHook(a.onCtxDoneHook)
+	xweb.SetHandlerDoneHook(a.onHandlerDoneHook)
 }
 
 func (a *ServerApp) Run() error {

@@ -2,6 +2,7 @@ package runserver
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/hqdem/go-api-template/internal/config"
 	"github.com/hqdem/go-api-template/internal/connectors/postgre"
@@ -38,7 +39,20 @@ func RunServer(cfgPath string) error {
 		xlog.Error(ctx, ctxErr.Error())
 	}
 
-	app, err := xhttp.NewServerApp(facadeObj, onPanicHook, onCtxDoneHook)
+	onHandlerDoneHook := func(ctx context.Context, res any, err error) {
+		if err != nil {
+			xlog.Error(ctx, fmt.Sprintf("error while handle request: %v", err))
+			return
+		}
+		jsonBytes, err := json.Marshal(res)
+		if err != nil {
+			xlog.Error(ctx, fmt.Sprintf("can not convert handler result to json: %v", err))
+			return
+		}
+		xlog.Info(ctx, fmt.Sprintf("handler result: %s", string(jsonBytes)))
+	}
+
+	app, err := xhttp.NewServerApp(facadeObj, onPanicHook, onCtxDoneHook, onHandlerDoneHook)
 	if err != nil {
 		return err
 	}
