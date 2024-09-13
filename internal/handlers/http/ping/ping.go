@@ -2,10 +2,10 @@ package ping
 
 import (
 	"context"
-	"github.com/hqdem/go-api-template/lib/xweb"
-	"github.com/hqdem/go-api-template/pkg/core/actions"
-	"github.com/hqdem/go-api-template/pkg/core/facade"
-	"github.com/hqdem/go-api-template/pkg/handlers/http/ping/schemas"
+	"github.com/hqdem/go-api-template/internal/core/actions"
+	"github.com/hqdem/go-api-template/internal/core/facade"
+	"github.com/hqdem/go-api-template/internal/handlers/http/ping/schemas"
+	"github.com/hqdem/go-api-template/pkg/xweb"
 	"net/http"
 )
 

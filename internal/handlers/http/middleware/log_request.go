@@ -3,8 +3,8 @@ package middleware
 import (
 	"bytes"
 	"fmt"
-	"github.com/hqdem/go-api-template/lib/xlog"
-	"github.com/hqdem/go-api-template/lib/xweb/middleware"
+	"github.com/hqdem/go-api-template/pkg/xlog"
+	"github.com/hqdem/go-api-template/pkg/xweb/middleware"
 	"io"
 	"net/http"
 )

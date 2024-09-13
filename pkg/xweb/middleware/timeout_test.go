@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"github.com/hqdem/go-api-template/lib/xweb"
+	"github.com/hqdem/go-api-template/pkg/xweb"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"

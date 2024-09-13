@@ -3,7 +3,7 @@ package middleware
 import (
 	"bytes"
 	"errors"
-	"github.com/hqdem/go-api-template/pkg/tests"
+	"github.com/hqdem/go-api-template/internal/tests"
 	"github.com/stretchr/testify/suite"
 	"io"
 	"net/http"

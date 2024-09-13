@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"github.com/hqdem/go-api-template/lib/xlog"
+	"github.com/hqdem/go-api-template/pkg/xlog"
 	"github.com/stretchr/testify/suite"
 )
 
