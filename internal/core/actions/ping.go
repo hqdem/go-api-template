@@ -2,8 +2,8 @@ package actions
 
 import (
 	"context"
-	"github.com/hqdem/go-api-template/lib/xlog"
-	"github.com/hqdem/go-api-template/pkg/core/entities"
+	"github.com/hqdem/go-api-template/internal/core/entities"
+	"github.com/hqdem/go-api-template/pkg/xlog"
 	"go.uber.org/zap"
 )
 

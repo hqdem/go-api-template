@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/hqdem/go-api-template/lib/xlog"
-	"github.com/hqdem/go-api-template/lib/xweb/middleware"
-	"github.com/hqdem/go-api-template/pkg/tests"
+	"github.com/hqdem/go-api-template/internal/tests"
+	"github.com/hqdem/go-api-template/pkg/xlog"
+	"github.com/hqdem/go-api-template/pkg/xweb/middleware"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"

@@ -1,8 +1,8 @@
 package xhttp
 
 import (
-	"github.com/hqdem/go-api-template/lib/xweb"
-	"github.com/hqdem/go-api-template/pkg/handlers/http/ping"
+	"github.com/hqdem/go-api-template/internal/handlers/http/ping"
+	"github.com/hqdem/go-api-template/pkg/xweb"
 	"net/http"
 )
 

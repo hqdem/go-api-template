@@ -1,8 +1,8 @@
 package facade
 
 import (
-	"github.com/hqdem/go-api-template/pkg/config"
-	"github.com/hqdem/go-api-template/pkg/core"
+	"github.com/hqdem/go-api-template/internal/config"
+	"github.com/hqdem/go-api-template/internal/core"
 )
 
 type Facade struct {

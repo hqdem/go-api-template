@@ -3,11 +3,11 @@ package runserver
 import (
 	"context"
 	"fmt"
-	"github.com/hqdem/go-api-template/lib/xlog"
-	"github.com/hqdem/go-api-template/pkg/config"
-	"github.com/hqdem/go-api-template/pkg/connectors/postgre"
-	"github.com/hqdem/go-api-template/pkg/core/facade"
-	xhttp "github.com/hqdem/go-api-template/pkg/handlers/http"
+	"github.com/hqdem/go-api-template/internal/config"
+	"github.com/hqdem/go-api-template/internal/connectors/postgre"
+	"github.com/hqdem/go-api-template/internal/core/facade"
+	xhttp "github.com/hqdem/go-api-template/internal/handlers/http"
+	"github.com/hqdem/go-api-template/pkg/xlog"
 	"go.uber.org/zap"
 )
 

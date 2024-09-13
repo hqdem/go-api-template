@@ -1,7 +1,7 @@
 package runserver
 
 import (
-	"github.com/hqdem/go-api-template/pkg/commands/runserver"
+	"github.com/hqdem/go-api-template/internal/commands/runserver"
 	"github.com/spf13/cobra"
 )
 

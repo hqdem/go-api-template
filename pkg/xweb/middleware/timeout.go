@@ -3,7 +3,7 @@ package middleware
 import (
 	"context"
 	"errors"
-	"github.com/hqdem/go-api-template/lib/xweb"
+	"github.com/hqdem/go-api-template/pkg/xweb"
 	"net/http"
 )
 

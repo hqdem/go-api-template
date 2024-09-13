@@ -3,11 +3,11 @@ package xhttp
 import (
 	"context"
 	"fmt"
-	"github.com/hqdem/go-api-template/lib/xlog"
-	"github.com/hqdem/go-api-template/lib/xweb"
-	xmiddleware "github.com/hqdem/go-api-template/lib/xweb/middleware"
-	"github.com/hqdem/go-api-template/pkg/core/facade"
-	"github.com/hqdem/go-api-template/pkg/handlers/http/middleware"
+	"github.com/hqdem/go-api-template/internal/core/facade"
+	"github.com/hqdem/go-api-template/internal/handlers/http/middleware"
+	"github.com/hqdem/go-api-template/pkg/xlog"
+	"github.com/hqdem/go-api-template/pkg/xweb"
+	xmiddleware "github.com/hqdem/go-api-template/pkg/xweb/middleware"
 	"net/http"
 )
 

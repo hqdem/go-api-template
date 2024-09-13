@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/hqdem/go-api-template/lib/xweb"
+	"github.com/hqdem/go-api-template/pkg/xweb"
 	"gopkg.in/yaml.v3"
 	"os"
 )
