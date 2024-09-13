@@ -11,12 +11,15 @@ import (
 
 type OnPanicFnHookT func(ctx context.Context, panicErr error, panicStack []byte)
 type OnCtxDoneHookT func(ctx context.Context)
+type OnHandlerDoneHookT func(ctx context.Context, res any, err error)
 
 var (
-	nopOnPanicHook   OnPanicFnHookT = func(ctx context.Context, panicErr error, panicStack []byte) {}
-	nopOnCtxDoneHook OnCtxDoneHookT = func(ctx context.Context) {}
-	onPanicHook                     = nopOnPanicHook
-	onCtxDoneHook                   = nopOnCtxDoneHook
+	nopOnPanicHook       OnPanicFnHookT     = func(ctx context.Context, panicErr error, panicStack []byte) {}
+	nopOnCtxDoneHook     OnCtxDoneHookT     = func(ctx context.Context) {}
+	nopOnHandlerDoneHook OnHandlerDoneHookT = func(ctx context.Context, res any, err error) {}
+	onPanicHook                             = nopOnPanicHook
+	onCtxDoneHook                           = nopOnCtxDoneHook
+	onHandlerDoneHook                       = nopOnHandlerDoneHook
 )
 
 // SetPanicFnHook is not thread safe and should be only called on application start
@@ -30,6 +33,13 @@ func SetPanicFnHook(fn OnPanicFnHookT) {
 func SetCtxDoneHook(fn OnCtxDoneHookT) {
 	if fn != nil {
 		onCtxDoneHook = fn
+	}
+}
+
+// SetHandlerDoneHook is not thread safe and should be only called on application start
+func SetHandlerDoneHook(fn OnHandlerDoneHookT) {
+	if fn != nil {
+		onHandlerDoneHook = fn
 	}
 }
 
@@ -77,6 +87,7 @@ func FacadeHandlerAdapter[FacadeT any, RespT any](
 				onCtxDoneHook(ctx)
 				return
 			case <-doneFnCh:
+				onHandlerDoneHook(ctx, res, err)
 				handleWriteResponse(responseWrapper, res, err)
 				return
 			case panicMsg := <-panicCh:
