@@ -3,7 +3,7 @@ package middleware
 import (
 	"bytes"
 	"errors"
-	"github.com/hqdem/go-api-template/lib/xtest"
+	"github.com/hqdem/go-api-template/pkg/tests"
 	"github.com/stretchr/testify/suite"
 	"io"
 	"net/http"
@@ -12,7 +12,7 @@ import (
 )
 
 type LogRequestMiddlewareTestSuite struct {
-	xtest.BaseTestSuite
+	tests.BaseTestSuite
 }
 
 func (s *LogRequestMiddlewareTestSuite) TestMiddleware() {

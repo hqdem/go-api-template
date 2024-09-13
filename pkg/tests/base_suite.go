@@ -1,4 +1,4 @@
-package xtest
+package tests
 
 import (
 	"github.com/hqdem/go-api-template/lib/xlog"
