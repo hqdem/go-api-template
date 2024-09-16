@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func Ping(ctx context.Context) (*entities.PingStatus, error) {
+func (a *ImplActions) Ping(ctx context.Context) (*entities.PingStatus, error) {
 	op := "actions.Ping"
 	xlog.Info(ctx, "start operation", zap.String("operation", op))
 	defer xlog.Info(ctx, "end operation", zap.String("operation", op))
