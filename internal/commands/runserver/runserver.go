@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/hqdem/go-api-template/internal/config"
 	"github.com/hqdem/go-api-template/internal/connectors/postgre"
+	"github.com/hqdem/go-api-template/internal/core/actions"
 	"github.com/hqdem/go-api-template/internal/core/facade"
 	xhttp "github.com/hqdem/go-api-template/internal/handlers/http"
 	"github.com/hqdem/go-api-template/pkg/xlog"
@@ -22,7 +23,8 @@ func RunServer(cfgPath string) error {
 		return err
 	}
 	storage := postgre.NewConnector()
-	facadeObj := facade.NewFacade(cfg, storage)
+	actionsImpl := actions.NewActions()
+	facadeObj := facade.NewFacade(cfg, storage, actionsImpl)
 
 	onPanicHook := func(ctx context.Context, panicErr error, panicStack []byte) {
 		ctx = xlog.WithFields(ctx, zap.String("panic_stack", string(panicStack)))
