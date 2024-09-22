@@ -1,3 +1,4 @@
+env: prod
 server:
   listen: "[::1]:8080"
 logger:
