@@ -11,10 +11,7 @@ import (
 type appEnv string
 
 func (e appEnv) IsValid() bool {
-	if !slices.Contains(validEnvs, e) {
-		return false
-	}
-	return true
+	return slices.Contains(validEnvs, e)
 }
 
 func (e appEnv) IsDevelopment() bool {
