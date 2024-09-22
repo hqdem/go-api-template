@@ -8,7 +8,9 @@ import (
 	"github.com/hqdem/go-api-template/pkg/xlog"
 	"github.com/hqdem/go-api-template/pkg/xweb"
 	xmiddleware "github.com/hqdem/go-api-template/pkg/xweb/middleware"
+	"net"
 	"net/http"
+	"time"
 )
 
 type ServerApp struct {
@@ -21,6 +23,7 @@ type ServerApp struct {
 }
 
 func NewServerApp(
+	baseCtx context.Context,
 	facade *facade.Facade,
 	onPanicHook xweb.OnPanicFnHookT,
 	onCtxDoneHook xweb.OnCtxDoneHookT,
@@ -48,6 +51,9 @@ func NewServerApp(
 	appContainer.server = &http.Server{
 		Addr:    cfg.Server.Listen,
 		Handler: handler,
+		BaseContext: func(_ net.Listener) context.Context {
+			return baseCtx
+		},
 	}
 	appContainer.initHooks()
 	return appContainer, nil
@@ -81,9 +87,25 @@ func (a *ServerApp) initHooks() {
 	xweb.SetHandlerDoneHook(a.onHandlerDoneHook)
 }
 
-func (a *ServerApp) Run() error {
-	// TODO: add run context
+func (a *ServerApp) Run(ctx context.Context) error {
 	logMsg := fmt.Sprintf("start listen server on addr: %s", a.server.Addr)
-	xlog.Info(context.Background(), logMsg)
-	return a.server.ListenAndServe()
+	xlog.Info(ctx, logMsg)
+	go func() {
+		_ = a.server.ListenAndServe()
+	}()
+
+	for {
+		select {
+		case <-ctx.Done():
+			xlog.Info(ctx, "gracefully shutting down the server")
+			err := a.server.Shutdown(ctx)
+			if err != nil {
+				return err
+			}
+			xlog.Info(ctx, "server stopped")
+			return ctx.Err()
+		default:
+			time.Sleep(time.Second * 1)
+		}
+	}
 }
