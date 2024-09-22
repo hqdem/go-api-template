@@ -11,9 +11,15 @@ import (
 	xhttp "github.com/hqdem/go-api-template/internal/handlers/http"
 	"github.com/hqdem/go-api-template/pkg/xlog"
 	"go.uber.org/zap"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func RunServer(cfgPath string) error {
+	runCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	cfg, err := config.NewConfig(cfgPath)
 	if err != nil {
 		return err
@@ -30,8 +36,7 @@ func RunServer(cfgPath string) error {
 		ctx = xlog.WithFields(ctx, zap.String("panic_stack", string(panicStack)))
 		xlog.Error(ctx, panicErr.Error())
 
-		// TODO: add env variable in config
-		if cfg.Logger.Development {
+		if cfg.Env.IsDevelopment() {
 			fmt.Println(string(panicStack)) // for debug purposes
 		}
 	}
@@ -54,9 +59,13 @@ func RunServer(cfgPath string) error {
 		xlog.Info(ctx, fmt.Sprintf("handler result: %s", string(jsonBytes)))
 	}
 
-	app, err := xhttp.NewServerApp(facadeObj, onPanicHook, onCtxDoneHook, onHandlerDoneHook)
+	app, err := xhttp.NewServerApp(runCtx, facadeObj, onPanicHook, onCtxDoneHook, onHandlerDoneHook)
 	if err != nil {
 		return err
 	}
-	return app.Run()
+	err = app.Run(runCtx)
+	if err != nil {
+		xlog.Error(runCtx, err.Error())
+	}
+	return nil
 }

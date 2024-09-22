@@ -88,8 +88,6 @@ func getZapLogLevel(logLevel string) zapcore.Level {
 	}
 }
 
-// TODO: context fields
-
 func Info(ctx context.Context, msg string, fields ...zap.Field) {
 	log := GetGlobalLogger()
 	ctxFields := GetContextFields(ctx)
