@@ -2,14 +2,17 @@ package xhttp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/hqdem/go-api-template/internal/core/facade"
 	"github.com/hqdem/go-api-template/internal/handlers/http/middleware"
 	"github.com/hqdem/go-api-template/pkg/xlog"
 	"github.com/hqdem/go-api-template/pkg/xweb"
 	xmiddleware "github.com/hqdem/go-api-template/pkg/xweb/middleware"
-	"net"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -23,7 +26,6 @@ type ServerApp struct {
 }
 
 func NewServerApp(
-	baseCtx context.Context,
 	facade *facade.Facade,
 	onPanicHook xweb.OnPanicFnHookT,
 	onCtxDoneHook xweb.OnCtxDoneHookT,
@@ -51,9 +53,6 @@ func NewServerApp(
 	appContainer.server = &http.Server{
 		Addr:    cfg.Server.Listen,
 		Handler: handler,
-		BaseContext: func(_ net.Listener) context.Context {
-			return baseCtx
-		},
 	}
 	appContainer.initHooks()
 	return appContainer, nil
@@ -87,25 +86,27 @@ func (a *ServerApp) initHooks() {
 	xweb.SetHandlerDoneHook(a.onHandlerDoneHook)
 }
 
-func (a *ServerApp) Run(ctx context.Context) error {
+func (a *ServerApp) Run(ctx context.Context) {
 	logMsg := fmt.Sprintf("start listen server on addr: %s", a.server.Addr)
 	xlog.Info(ctx, logMsg)
+
 	go func() {
-		_ = a.server.ListenAndServe()
+		if err := a.server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			xlog.Fatal(ctx, fmt.Sprintf("HTTP server error: %v", err))
+		}
+		xlog.Info(ctx, "stopped serving new connections")
 	}()
 
-	for {
-		select {
-		case <-ctx.Done():
-			xlog.Info(ctx, "gracefully shutting down the server")
-			err := a.server.Shutdown(ctx)
-			if err != nil {
-				return err
-			}
-			xlog.Info(ctx, "server stopped")
-			return ctx.Err()
-		default:
-			time.Sleep(time.Second * 1)
-		}
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
+
+	xlog.Info(ctx, "gracefully shutting down the server")
+	if err := a.server.Shutdown(shutdownCtx); err != nil {
+		xlog.Fatal(ctx, fmt.Sprintf("HTTP shutdown error: %v", err))
 	}
+	xlog.Info(ctx, "graceful shutdown complete")
 }

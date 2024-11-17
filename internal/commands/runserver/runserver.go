@@ -11,14 +11,11 @@ import (
 	xhttp "github.com/hqdem/go-api-template/internal/handlers/http"
 	"github.com/hqdem/go-api-template/pkg/xlog"
 	"go.uber.org/zap"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 func RunServer(cfgPath string) error {
-	runCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
+	runCtx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	cfg, err := config.NewConfig(cfgPath)
 	if err != nil {
@@ -59,13 +56,11 @@ func RunServer(cfgPath string) error {
 		xlog.Info(ctx, fmt.Sprintf("handler result: %s", string(jsonBytes)))
 	}
 
-	app, err := xhttp.NewServerApp(runCtx, facadeObj, onPanicHook, onCtxDoneHook, onHandlerDoneHook)
+	app, err := xhttp.NewServerApp(facadeObj, onPanicHook, onCtxDoneHook, onHandlerDoneHook)
 	if err != nil {
 		return err
 	}
-	err = app.Run(runCtx)
-	if err != nil {
-		xlog.Error(runCtx, err.Error())
-	}
+	app.Run(runCtx)
+
 	return nil
 }
