@@ -6,6 +6,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"os"
 	"slices"
+	"time"
 )
 
 type appEnv string
@@ -32,7 +33,9 @@ var (
 )
 
 type ServerConf struct {
-	Listen string `yaml:"listen"`
+	Listen            string        `yaml:"listen"`
+	ReadHeaderTimeout time.Duration `yaml:"read_header_timeout"`
+	IdleTimeout       time.Duration `yaml:"idle_timeout"`
 }
 
 type LoggerConf struct {

@@ -1,6 +1,8 @@
 env: prod
 server:
   listen: "[::1]:8080"
+  read_header_timeout: 500ms
+  idle_timeout: 1s
 logger:
   level: "INFO"
   development: false
