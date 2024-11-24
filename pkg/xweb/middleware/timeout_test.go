@@ -44,7 +44,7 @@ func (s *TimeoutMiddlewareTestSuite) TestMiddleware() {
 			HandlerFn: func(w http.ResponseWriter, r *http.Request) {
 				time.Sleep(2 * time.Second)
 			},
-			ExpectedStatusCode: http.StatusGatewayTimeout,
+			ExpectedStatusCode: http.StatusServiceUnavailable,
 			ExpectedError:      context.DeadlineExceeded,
 		},
 		{
@@ -62,7 +62,7 @@ func (s *TimeoutMiddlewareTestSuite) TestMiddleware() {
 			HandlerFn: func(w http.ResponseWriter, r *http.Request) {
 				time.Sleep(2 * time.Second)
 			},
-			ExpectedStatusCode: http.StatusGatewayTimeout,
+			ExpectedStatusCode: http.StatusServiceUnavailable,
 			ExpectedError:      context.DeadlineExceeded,
 		},
 	}
