@@ -1,6 +1,8 @@
 env: dev
 server:
   listen: "[::1]:8081"
+  read_header_timeout: 500ms
+  idle_timeout: 1s
 logger:
   level: "DEBUG"
   development: true

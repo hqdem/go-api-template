@@ -16,7 +16,7 @@ func TimeoutMiddleware(timeoutHandlersConfig *xweb.HandlersConfig) Middleware {
 			defer func() {
 				cancel()
 				if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-					w.WriteHeader(http.StatusGatewayTimeout)
+					w.WriteHeader(http.StatusServiceUnavailable)
 				}
 			}()
 			*r = *r.WithContext(ctx)

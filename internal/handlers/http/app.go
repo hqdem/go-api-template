@@ -51,8 +51,10 @@ func NewServerApp(
 		return nil, err
 	}
 	appContainer.server = &http.Server{
-		Addr:    cfg.Server.Listen,
-		Handler: handler,
+		Addr:              cfg.Server.Listen,
+		ReadHeaderTimeout: cfg.Server.ReadHeaderTimeout,
+		IdleTimeout:       cfg.Server.IdleTimeout,
+		Handler:           handler,
 	}
 	appContainer.initHooks()
 	return appContainer, nil
