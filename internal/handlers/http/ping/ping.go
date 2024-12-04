@@ -8,8 +8,8 @@ import (
 	"net/http"
 )
 
-func PingHandler(ctx context.Context, _ *xweb.ResponseHeaders, _ *http.Request, f *facade.Facade) (*schemas.PingResponseSchema, error) {
-	pingStatus, err := f.Actions.Ping(ctx)
+func GetPingStatus(ctx context.Context, _ *xweb.ResponseHeaders, _ *http.Request, f *facade.Facade) (*schemas.PingResponseSchema, error) {
+	pingStatus, err := f.PingService.Ping(ctx)
 	if err != nil {
 		return nil, err
 	}
