@@ -1,20 +1,23 @@
 package facade
 
 import (
+	"context"
 	"github.com/hqdem/go-api-template/internal/config"
-	"github.com/hqdem/go-api-template/internal/core"
+	"github.com/hqdem/go-api-template/internal/core/entities"
 )
 
-type Facade struct {
-	Config  *config.Config
-	Storage core.DBStorage
-	Actions core.Actions
+type pingService interface {
+	Ping(ctx context.Context) (entities.PingStatus, error)
 }
 
-func NewFacade(cfg *config.Config, storage core.DBStorage, actions core.Actions) *Facade {
+type Facade struct {
+	Config      *config.Config
+	PingService pingService
+}
+
+func NewFacade(cfg *config.Config, pingService pingService) *Facade {
 	return &Facade{
-		Config:  cfg,
-		Storage: storage,
-		Actions: actions,
+		Config:      cfg,
+		PingService: pingService,
 	}
 }

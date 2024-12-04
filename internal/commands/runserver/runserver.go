@@ -2,12 +2,13 @@ package runserver
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/hqdem/go-api-template/internal/config"
-	"github.com/hqdem/go-api-template/internal/connectors/postgre"
-	"github.com/hqdem/go-api-template/internal/core/actions"
+	"github.com/hqdem/go-api-template/internal/connectors/postgres_repository"
 	"github.com/hqdem/go-api-template/internal/core/facade"
+	"github.com/hqdem/go-api-template/internal/core/services/ping_service"
 	xhttp "github.com/hqdem/go-api-template/internal/handlers/http"
 	"github.com/hqdem/go-api-template/pkg/xlog"
 	"go.uber.org/zap"
@@ -25,9 +26,13 @@ func RunServer(cfgPath string) error {
 	if err != nil {
 		return err
 	}
-	storage := postgre.NewConnector()
-	actionsImpl := actions.NewActions()
-	facadeObj := facade.NewFacade(cfg, storage, actionsImpl)
+
+	var nopConnection *sql.DB
+	pingRepo := postgres_repository.NewPingRepo(nopConnection)
+
+	pingService := ping_service.New(pingRepo)
+
+	facadeObj := facade.NewFacade(cfg, pingService)
 
 	onPanicHook := func(ctx context.Context, panicErr error, panicStack []byte) {
 		ctx = xlog.WithFields(ctx, zap.String("panic_stack", string(panicStack)))

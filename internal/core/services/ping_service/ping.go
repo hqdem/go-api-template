@@ -1,4 +1,4 @@
-package actions
+package ping_service
 
 import (
 	"context"
@@ -7,10 +7,11 @@ import (
 	"go.uber.org/zap"
 )
 
-func (a *ImplActions) Ping(ctx context.Context) (*entities.PingStatus, error) {
+func (s *Service) Ping(ctx context.Context) (entities.PingStatus, error) {
 	op := "actions.Ping"
 	xlog.Info(ctx, "start operation", zap.String("operation", op))
 	defer xlog.Info(ctx, "end operation", zap.String("operation", op))
 
-	return entities.NewPingStatus("pong"), nil
+	pingStatus, err := s.PingRepo.PingDB(ctx)
+	return entities.PingStatus{Status: pingStatus}, err
 }
