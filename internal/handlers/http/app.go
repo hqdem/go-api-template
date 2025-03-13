@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hqdem/go-api-template/internal/core/facade"
+	"github.com/hqdem/go-api-template/internal/config"
 	"github.com/hqdem/go-api-template/internal/handlers/http/middleware"
+	"github.com/hqdem/go-api-template/internal/handlers/http/ping"
 	"github.com/hqdem/go-api-template/pkg/xlog"
 	"github.com/hqdem/go-api-template/pkg/xweb"
 	xmiddleware "github.com/hqdem/go-api-template/pkg/xweb/middleware"
@@ -17,7 +18,8 @@ import (
 )
 
 type ServerApp struct {
-	Facade            *facade.Facade
+	cfg               *config.Config
+	pingHTTP          *ping.HTTPService
 	onPanicHook       xweb.OnPanicFnHookT
 	onCtxDoneHook     xweb.OnCtxDoneHookT
 	onHandlerDoneHook xweb.OnHandlerDoneHookT
@@ -26,14 +28,15 @@ type ServerApp struct {
 }
 
 func NewServerApp(
-	facade *facade.Facade,
+	cfg *config.Config,
+	pingHTTP *ping.HTTPService,
 	onPanicHook xweb.OnPanicFnHookT,
 	onCtxDoneHook xweb.OnCtxDoneHookT,
 	onHandlerDoneHook xweb.OnHandlerDoneHookT,
 ) (*ServerApp, error) {
-	cfg := facade.Config
 	appContainer := &ServerApp{
-		Facade:            facade,
+		cfg:               cfg,
+		pingHTTP:          pingHTTP,
 		onPanicHook:       onPanicHook,
 		onCtxDoneHook:     onCtxDoneHook,
 		onHandlerDoneHook: onHandlerDoneHook,
@@ -61,9 +64,8 @@ func NewServerApp(
 }
 
 func (a *ServerApp) initMiddlewares(handler http.Handler) (http.Handler, error) {
-	cfg := a.Facade.Config
 	middlewareChain := []xmiddleware.Middleware{
-		xmiddleware.TimeoutMiddleware(cfg.Handlers),
+		xmiddleware.TimeoutMiddleware(a.cfg.Handlers),
 		xmiddleware.RequestIDMiddleware(),
 		middleware.LogRequestIDMiddleware(),
 		middleware.LogRequestMiddleware(),

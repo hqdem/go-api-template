@@ -1,7 +1,6 @@
 package xhttp
 
 import (
-	"github.com/hqdem/go-api-template/internal/handlers/http/ping"
 	"github.com/hqdem/go-api-template/pkg/xweb"
 	"net/http"
 )
@@ -15,7 +14,7 @@ func (a *ServerApp) GetRoutes() []Route {
 	return []Route{
 		{
 			Pattern: "GET /ping",
-			Fn:      xweb.FacadeHandlerAdapter(a.Facade, ping.GetPingStatus),
+			Fn:      xweb.HandlerFunc(a.pingHTTP.GetPingStatus),
 		},
 		{
 			Pattern: "/",
