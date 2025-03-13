@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hqdem/go-api-template/cmd"
 	"github.com/hqdem/go-api-template/pkg/xlog"
+	_ "go.uber.org/automaxprocs"
 	"go.uber.org/zap"
 )
 
