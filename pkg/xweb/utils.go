@@ -52,7 +52,6 @@ func HandlerFunc[RespT any](
 	f func(ctx context.Context, w *ResponseHeaders, r *http.Request) (RespT, error),
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, request *http.Request) {
-		// TODO: tracing here
 		ctx := request.Context()
 
 		var (
