@@ -4,6 +4,10 @@ CFG_PATH=./configs/dev/common.yaml
 build:
 	go build -o app main.go
 
+.PHONY: generate-swagger
+generate-swagger:
+	swag init -g internal/commands/runserver/runserver.go && swag fmt
+
 .PHONY: runserver
 runserver:
 	./app run --config $(CFG_PATH)
@@ -16,3 +20,7 @@ staticcheck:
 .PHONY: lint
 lint:
 	golangci-lint run ./...
+
+.PHONY: bin-deps
+bin-deps:
+	go install github.com/swaggo/swag/cmd/swag@latest

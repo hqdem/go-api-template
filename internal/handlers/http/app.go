@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/flowchartsman/swaggerui"
+	"github.com/hqdem/go-api-template/docs"
 	"github.com/hqdem/go-api-template/internal/config"
 	"github.com/hqdem/go-api-template/internal/handlers/http/middleware"
 	"github.com/hqdem/go-api-template/internal/handlers/http/ping"
@@ -53,6 +55,10 @@ func NewServerApp(
 	if err != nil {
 		return nil, err
 	}
+
+	// Run Swagger spec
+	appContainer.mux.Handle("/docs/", http.StripPrefix("/docs", swaggerui.Handler(docs.SwaggerSpec)))
+
 	appContainer.server = &http.Server{
 		Addr:              cfg.Server.Listen,
 		ReadHeaderTimeout: cfg.Server.ReadHeaderTimeout,

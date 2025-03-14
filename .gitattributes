@@ -1,0 +1,3 @@
+./docs/swagger.json -diff
+./docs/swagger.yaml -diff
+./docs/docs.go -diff

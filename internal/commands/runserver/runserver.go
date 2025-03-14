@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	_ "github.com/hqdem/go-api-template/docs"
 	"github.com/hqdem/go-api-template/internal/config"
 	"github.com/hqdem/go-api-template/internal/connectors/postgres_repository"
 	"github.com/hqdem/go-api-template/internal/core/services/ping_service"
@@ -13,6 +14,12 @@ import (
 	"github.com/hqdem/go-api-template/pkg/xlog"
 	"go.uber.org/zap"
 )
+
+//	@title			Go Template API
+//	@version		1.0
+//	@description	Swagger for Go HTTP API template
+
+//	@host	localhost:8081
 
 func RunServer(cfgPath string) error {
 	runCtx, cancel := context.WithCancel(context.Background())

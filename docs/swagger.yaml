@@ -1,0 +1,46 @@
+definitions:
+  schemas.PingResponseSchema:
+    properties:
+      status:
+        type: string
+    type: object
+  xweb.APIErrorResponse:
+    properties:
+      code:
+        type: string
+      details:
+        additionalProperties: {}
+        type: object
+      message:
+        type: string
+    type: object
+  xweb.ApiOKResponse-schemas_PingResponseSchema:
+    properties:
+      data:
+        $ref: '#/definitions/schemas.PingResponseSchema'
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: Swagger for Go HTTP API template
+  title: Go Template API
+  version: "1.0"
+paths:
+  /ping:
+    get:
+      description: Get ping status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/xweb.ApiOKResponse-schemas_PingResponseSchema'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/xweb.APIErrorResponse'
+      summary: Ping service
+      tags:
+      - ping
+swagger: "2.0"
