@@ -52,7 +52,7 @@ func (s *TracingMiddlewareTestSuite) TestTracingMiddleware() {
 			handler := TracingMiddleware()(testCase.HandlerFn)
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest("GET", "localhost:8080/test_span_operation", nil)
+			r := httptest.NewRequest("GET", "http://localhost:8080/test_span_operation", nil)
 
 			handler.ServeHTTP(w, r)
 
