@@ -11,6 +11,7 @@ import (
 	"github.com/hqdem/go-api-template/internal/core/services/ping_service"
 	xhttp "github.com/hqdem/go-api-template/internal/handlers/http"
 	pinghttp "github.com/hqdem/go-api-template/internal/handlers/http/ping"
+	xotel "github.com/hqdem/go-api-template/pkg/otel"
 	"github.com/hqdem/go-api-template/pkg/xlog"
 	"github.com/hqdem/go-api-template/pkg/xotel"
 	"go.uber.org/zap"
