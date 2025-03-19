@@ -3,7 +3,7 @@ package middleware
 import (
 	"context"
 	"encoding/json"
-	xotel "github.com/hqdem/go-api-template/pkg/otel"
+	"github.com/hqdem/go-api-template/pkg/xotel"
 	"github.com/stretchr/testify/suite"
 	"go.opentelemetry.io/otel/trace"
 	"io"
