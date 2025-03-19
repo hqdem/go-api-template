@@ -71,6 +71,7 @@ func NewServerApp(
 
 func (a *ServerApp) initMiddlewares(handler http.Handler) (http.Handler, error) {
 	middlewareChain := []xmiddleware.Middleware{
+		xmiddleware.TracingMiddleware(),
 		xmiddleware.TimeoutMiddleware(a.cfg.Handlers),
 		xmiddleware.RequestIDMiddleware(),
 		middleware.LogRequestIDMiddleware(),

@@ -11,6 +11,7 @@ import (
 	"github.com/hqdem/go-api-template/internal/core/services/ping_service"
 	xhttp "github.com/hqdem/go-api-template/internal/handlers/http"
 	pinghttp "github.com/hqdem/go-api-template/internal/handlers/http/ping"
+	xotel "github.com/hqdem/go-api-template/pkg/otel"
 	"github.com/hqdem/go-api-template/pkg/xlog"
 	"go.uber.org/zap"
 )
@@ -29,7 +30,16 @@ func RunServer(cfgPath string) error {
 	if err != nil {
 		return err
 	}
+
 	err = xlog.SetDefaultLogger(cfg.Logger.Level, cfg.Logger.Development)
+	if err != nil {
+		return err
+	}
+
+	otelShutdown, err := xotel.SetupOTelSDK(runCtx)
+	defer func() {
+		_ = otelShutdown(runCtx)
+	}()
 	if err != nil {
 		return err
 	}
