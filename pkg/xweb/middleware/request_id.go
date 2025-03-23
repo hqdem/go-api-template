@@ -28,6 +28,14 @@ func generateRandString(n int) string {
 	return randString.String()
 }
 
+func getRequestID(ctx context.Context) string {
+	val := ctx.Value(requestIDCtxKey{})
+	if val == nil {
+		return ""
+	}
+	return val.(string)
+}
+
 func RequestIDMiddleware() Middleware {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {

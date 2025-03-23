@@ -6,7 +6,10 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+	"io"
 )
 
 // SetupOTelSDK bootstraps the OpenTelemetry pipeline.
@@ -55,14 +58,34 @@ func newPropagator() propagation.TextMapPropagator {
 }
 
 func newTracerProvider() (*trace.TracerProvider, error) {
+	// NOT PRINTING TRACES, YOU SHOULD CONFIGURE REAL EXPORTER INSTEAD THIS ONE
 	traceExporter, err := stdouttrace.New(
-		stdouttrace.WithPrettyPrint())
+		stdouttrace.WithPrettyPrint(),
+		stdouttrace.WithWriter(io.Discard),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	r, err := resource.Merge(
+		resource.Default(),
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceName("go-api-template"),
+		),
+	)
 	if err != nil {
 		return nil, err
 	}
 
 	tracerProvider := trace.NewTracerProvider(
 		trace.WithBatcher(traceExporter),
+		trace.WithResource(r),
+		trace.WithSampler(
+			trace.ParentBased(
+				trace.TraceIDRatioBased(1.0),
+			),
+		),
 	)
 	return tracerProvider, nil
 }
